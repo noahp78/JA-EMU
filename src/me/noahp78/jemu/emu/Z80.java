@@ -22,12 +22,13 @@ public class Z80 {
     public boolean stopped = false;
     //CLOCK
     int m, t;
+    int unknown = 0;
 
     public Z80() {
         f = 0x0;
         //Maybe also point PC to start of rom?
         this.pc = 0;
-        this.sp = 0x0100;
+        this.sp = 0;
     }
 
     public void exec() {
@@ -46,26 +47,32 @@ public class Z80 {
             //Port BC back to B and C
             b = bc & 0xFF;
             c = bc >> 8;
+            System.out.println("Operation on BC("+bc+"), splitting to B:" + b + "/" + c);
+
         } else if (de != pre_de) {
             //There was a operation on DE
             d = de & 0xFF;
             e = de >> 8;
+            System.out.println("Operation on DE ("+de+"), splitting to D:" + d + "/" + e);
+
         } else if (hl != pre_hl) {
             //There was a operation on HL
             h = hl & 0xFF;
             l = hl >> 8;
+            System.out.println("Operation on HL ("+hl+"), splitting to H:" + h + "/" + l);
+
         }
-        if (pc > 1000) {
+        if (pc > Gameboy.memory.bios.length) {
+            System.out.println("BIOS ENDED with SIZE " + Gameboy.memory.bios.length + " or 0x" + Integer.toHexString(Gameboy.memory.bios.length) + " We know " + (256 - unknown) + "/256 opcodes");
             this.stopped = true;
         }
         pc &= 0xFFFF;
     }
 
     public void run(int opcode) {
-        System.out.print(Integer.toHexString(opcode) + " ");
+        //System.out.print(Integer.toHexString(pc) + " ");
         switch (opcode) {
             case 0x00:
-            case 0x49:
             case 0xD3:
             case 0xDB:
             case 0xE3:
@@ -144,15 +151,216 @@ public class Z80 {
             case 0x2E:
                 this.LD("l", "n");
                 return;
-
+            case 0x7F:
+                this.LD("a", "a");
+                return;
+            case 0x78:
+                this.LD("a", "b");
+                return;
+            case 0x79:
+                this.LD("a", "c");
+                return;
+            case 0x7A:
+                this.LD("a", "d");
+                return;
+            case 0x7B:
+                this.LD("a", "e");
+                return;
+            case 0x7C:
+                this.LD("a", "h");
+                return;
+            case 0x7D:
+                this.LD("a", "l");
+                return;
+            case 0x7E:
+                this.LD("a", "hl");
+                return;
+            case 0x40:
+                this.LD("b", "b");
+                return;
+            case 0x41:
+                this.LD("b", "c");
+                return;
+            case 0x42:
+                this.LD("b", "d");
+                return;
+            case 0x43:
+                this.LD("b", "e");
+                return;
+            case 0x44:
+                this.LD("b", "h");
+                return;
+            case 0x45:
+                this.LD("b", "l");
+                return;
+            case 0x46:
+                this.LD("b", "hl");
+                return;
+            case 0x48:
+                this.LD("c", "b");
+                return;
+            case 0x49:
+                this.LD("c", "c");
+                return;
+            case 0x4A:
+                this.LD("c", "d");
+                return;
+            case 0x4B:
+                this.LD("c", "e");
+                return;
+            case 0x4C:
+                this.LD("c", "h");
+                return;
+            case 0x4D:
+                this.LD("c", "l");
+                return;
+            case 0x4E:
+                this.LD("c", "hl");
+                return;
+            case 0x50:
+                this.LD("d", "b");
+                return;
+            case 0x51:
+                this.LD("d", "c");
+                return;
+            case 0x52:
+                this.LD("d", "d");
+                return;
+            case 0x53:
+                this.LD("d", "e");
+                return;
+            case 0x54:
+                this.LD("d", "h");
+                return;
+            case 0x55:
+                this.LD("d", "l");
+                return;
+            case 0x56:
+                this.LD("d", "hl");
+                return;
+            case 0x58:
+                this.LD("e", "b");
+                return;
+            case 0x59:
+                this.LD("e", "c");
+                return;
+            case 0x5A:
+                this.LD("e", "d");
+                return;
+            case 0x5B:
+                this.LD("e", "e");
+                return;
+            case 0x5C:
+                this.LD("e", "h");
+                return;
+            case 0x5D:
+                this.LD("e", "l");
+                return;
+            case 0x5E:
+                this.LD("e", "hl");
+                return;
+            case 0x60:
+                this.LD("h", "b");
+                return;
+            case 0x61:
+                this.LD("h", "c");
+                return;
+            case 0x62:
+                this.LD("h", "d");
+                return;
+            case 0x63:
+                this.LD("h", "e");
+                return;
+            case 0x64:
+                this.LD("h", "h");
+                return;
+            case 0x65:
+                this.LD("h", "l");
+                return;
+            case 0x66:
+                this.LD("h", "hl");
+                return;
+            case 0x68:
+                this.LD("l", "b");
+                return;
+            case 0x69:
+                this.LD("l", "c");
+                return;
+            case 0x6A:
+                this.LD("l", "d");
+                return;
+            case 0x6B:
+                this.LD("l", "e");
+                return;
+            case 0x6C:
+                this.LD("l", "h");
+                return;
+            case 0x6D:
+                this.LD("l", "l");
+                return;
+            case 0x6E:
+                this.LD("l", "hl");
+                return;
+            case 0x70:
+                this.LD("hl", "b");
+                return;
+            case 0x71:
+                this.LD("hl", "c");
+                return;
+            case 0x72:
+                this.LD("hl", "d");
+                return;
+            case 0x73:
+                this.LD("hl", "e");
+                return;
+            case 0x74:
+                this.LD("hl", "h");
+                return;
+            case 0x75:
+                this.LD("hl", "l");
+                return;
+            case 0x36:
+                this.LD("hl", "n");
+                return;
+            // ^ Everything upto page 68 of doc ^ //
             case 1000:
                 this.STOP();
                 return;
         }
-        System.out.println("0x" + Integer.toHexString(opcode) + " at PC 0x" + Integer.toHexString(this.pc) + "(" + opcode + "/" + this.pc + ")");
+        //System.out.println("0x" + Integer.toHexString(opcode) + " at PC 0x" + Integer.toHexString(this.pc) + "(" + opcode + "/" + this.pc + ")");
+        log("- UNKNOWN OPCODE -");
+        unknown++;
         if (Gameboy.HALT_IF_UNKNOWN_OPCODE) {
             this.stopped = true;
         }
+    }
+
+    public void log(String text) {
+        String base = "SP: " + sp + " | PC: " + Integer.toHexString(pc);
+        String mem = "";
+        if (text.contains(",nn") || text.contains("nn,")) {
+            mem = Integer.toHexString(Gameboy.memory.rb(pc)) + " " + Integer.toHexString(Gameboy.memory.rb(pc + 1)) + " " + Integer.toHexString(Gameboy.memory.rb(pc + 2));
+        } else if (text.contains(",n") || text.contains("n,")) {
+            mem = Integer.toHexString(Gameboy.memory.rb(pc)) + " " + Integer.toHexString(Gameboy.memory.rb(pc + 1));
+        } else {
+            mem = Integer.toHexString(Gameboy.memory.rb(pc));
+        }
+        text = text.replace(",nn", "," + Integer.toHexString(nn));
+        text = text.replace(",n", "," + Integer.toHexString(n));
+        text = text.replace("nn,", Integer.toHexString(nn) + ",");
+        text = text.replace("n,", Integer.toHexString(n) + ",");
+        int whitespace = 64;
+        int spaceforinfo = 18;
+        spaceforinfo = spaceforinfo - base.length();
+        for (int i = 0; i < spaceforinfo; i++) {
+            base = base + " ";
+        }
+        int length = base.length() + text.length();
+        whitespace = whitespace - length - mem.length();
+        for (int i = 0; i <= whitespace; i++) {
+            mem = " " + mem;
+        }
+        System.out.println(base + " " + text + " " + mem);
     }
 
     /**
@@ -162,9 +370,9 @@ public class Z80 {
      * @param index2 letter of the index
      */
     public void ADD(String index, String index2) {
-        System.out.println("ADD " + index + "," + index2);
-        Field i1 =null;
-        if(index2.equals("#")) {
+        log("ADD " + index + "," + index2);
+        Field i1 = null;
+        if (index2.equals("#")) {
             Field i2;
             try {
                 i1 = this.getClass().getDeclaredField(index.toLowerCase());
@@ -183,22 +391,22 @@ public class Z80 {
             } else {
                 System.out.println("Invalid INDEX (ADD " + index + "," + index2 + ")");
             }
-        }else{
-            try{
+        } else {
+            try {
                 i1 = this.getClass().getDeclaredField(index.toLowerCase());
-                i1.setInt(this,i1.getInt(this) + n);
-            pc++;
-            }catch(Exception e){
+                i1.setInt(this, i1.getInt(this) + n);
+                incPC();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         try {
             if ((i1.getInt(this) & 255) == 0) this.f |= 0x80;
-            if (i1.getInt(this)  > 255) this.f |= 0x10;       // Check for carry
+            if (i1.getInt(this) > 255) this.f |= 0x10;       // Check for carry
             this.a &= 255;
             this.m = 1;
             this.t = 4;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -207,16 +415,18 @@ public class Z80 {
      * No-Operation NOP
      */
     private void NOP() {
-        System.out.println("NOP");
+        log("NOP");
         this.m = 1;
         this.t = 4;
     }
-    private void incPC(){
+
+    private void incPC() {
         pc++;
         pc &= 0xFFFF;
     }
-    private void LD(String nn, String n){
-        System.out.println("LD " + n + "," + nn);
+
+    private void LD(String nn, String n) {
+        log("LD " + nn + "," + n);
         Field i1;
         Field i2;
         try {
@@ -230,14 +440,20 @@ public class Z80 {
         if (i1.getType() == int.class) {
             try {
                 i1.setInt(this, i2.getInt(this));
-                incPC();
+                if (n.equals("n")) {
+                    incPC();
+                } else if (n.equals("nn")) {
+                    incPC();
+                    incPC();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
+
     private void CP(String a, String b) {
-        System.out.println("CP " + a + "," + b);
+        log("CP " + a + "," + b);
         Field i1;
         Field i2;
         try {
