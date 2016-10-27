@@ -28,8 +28,8 @@ public class Gameboy {
         }catch(Exception e){
             e.printStackTrace();
         }
-        System.out.println("READ ROM: ");
-        System.out.println(memory.rom);
+        System.out.println("READ ROM");
+
 
 
 

@@ -9,8 +9,13 @@ import java.lang.reflect.Field;
  * Created by noahp on 26/okt/2016 for JA-EMU
  */
 public class Z80 {
+    private static final int Z_FLAG = 0x80;
+    private static final int N_FLAG = 0x40;
+    private static final int H_FLAG = 0x20;
+    private static final int C_FLAG = 0x10;
     //REGISTERS (8 BITS MAX 255)
     public int a, b, c, d, e, h, l, f;
+    public int af = -32770;
     public int bc = -32770;
     public int de = -32770;
     public int hl = -32770;
@@ -40,6 +45,7 @@ public class Z80 {
         int pre_bc = bc;
         int pre_de = de;
         int pre_hl = hl;
+        int pre_af = af;
         run(opcode);
         pc++;
         if (bc != pre_bc) {
@@ -47,19 +53,25 @@ public class Z80 {
             //Port BC back to B and C
             b = bc & 0xFF;
             c = bc >> 8;
-            System.out.println("Operation on BC("+bc+"), splitting to B:" + b + "/" + c);
+            //System.out.println("Operation on BC("+bc+"), splitting to B:" + b + "/" + c);
 
         } else if (de != pre_de) {
             //There was a operation on DE
             d = de & 0xFF;
             e = de >> 8;
-            System.out.println("Operation on DE ("+de+"), splitting to D:" + d + "/" + e);
+            //System.out.println("Operation on DE ("+de+"), splitting to D:" + d + "/" + e);
 
         } else if (hl != pre_hl) {
             //There was a operation on HL
             h = hl & 0xFF;
             l = hl >> 8;
-            System.out.println("Operation on HL ("+hl+"), splitting to H:" + h + "/" + l);
+            //System.out.println("Operation on HL ("+hl+"), splitting to H:" + h + "/" + l);
+
+        }else if(af !=pre_af){
+            //There was a operation on HL
+            a = af & 0xFF;
+            f = af >> 8;
+           // System.out.println("Operation on af ("+af+"), splitting to H:" + a + "/" + f);
 
         }
         if (pc > Gameboy.memory.bios.length) {
@@ -68,7 +80,12 @@ public class Z80 {
         }
         pc &= 0xFFFF;
     }
+    private int res(int n, int val) {
 
+        val &= ~(0x1 << n);
+
+        return val & 0xFF;
+    }
     public void run(int opcode) {
         //System.out.print(Integer.toHexString(pc) + " ");
         switch (opcode) {
@@ -367,7 +384,125 @@ public class Z80 {
             case 0xE2:
                 this.LDCA();
                 return;
-            // ^ Everything upto page 68 of doc ^ //
+            case 0x3A:
+                this.LDD("a", "hl");
+                return;
+            case 0x32:
+                this.LDD("hl", "a");
+                return;
+            case 0x2A:
+                this.LDI("a", "hl");
+                return;
+            case 0x22:
+                this.LDI("hl", "a");
+                return;
+            case 0xF0:
+                this.LDHAN();
+                return;
+            case 0xE0:
+                this.LDHNA();
+                return;
+            case 0x01:
+                this.LD("bc","nn");
+                return;
+            case 0x11:
+                this.LD("de","nn");
+                return;
+            case 0x21:
+                this.LD("hl","nn");
+                return;
+            case 0x31:
+                this.LD("sp","nn");
+                return;
+            case 0xF9:
+                this.LD("sp","hl");
+                return;
+            case 0xF8:
+                this.LDHL("sp","n");
+                return;
+            case 0x08:
+                this.LD("nn","sp");
+                return;
+            case 0xF5:
+                this.PUSH("af");
+                return;
+            case 0xC5:
+                this.PUSH("bc");
+                return;
+            case 0xD5:
+                this.PUSH("de");
+                return;
+            case 0xE5:
+                this.PUSH("hl");
+                return;
+            case 0xF1:
+                this.POP("af");
+                return;
+            case 0xC1:
+                this.POP("bc");
+                return;
+            case 0xD1:
+                this.POP("de");
+                return;
+            case 0xE1:
+                this.POP("hl");
+                return;
+            case 0x8F:
+                this.adc("a", "a");
+                return;
+            case 0x88:
+                this.adc("a", "b");
+                return;
+            case 0x89:
+                this.adc("a", "c");
+                return;
+            case 0x8A:
+                this.adc("a", "d");
+                return;
+            case 0x8B:
+                this.adc("a", "e");
+                return;
+            case 0x8C:
+                this.adc("a", "h");
+                return;
+            case 0x8D:
+                this.adc("a", "l");
+                return;
+            case 0x8E:
+                this.adc("a", "hl");
+                return;
+            case 0xCE:
+                this.adc("a", "n");
+                return;
+            case 0x97:
+                this.SUB("a","a");
+                return;
+            case 0x90:
+                this.SUB("a","b");
+                return;
+            case 0x91:
+                this.SUB("a","c");
+                return;
+            case 0x92:
+                this.SUB("a","d");
+                return;
+            case 0x93:
+                this.SUB("a","e");
+                return;
+            case 0x94:
+                this.SUB("a","h");
+                return;
+            case 0x95:
+                this.SUB("a","l");
+                return;
+            case 0x96:
+                this.SUB("a","hl");
+                return;
+            case 0xD6:
+                this.SUB("a","n");
+                return;
+
+            // ^ Everything upto page 81 doc ^ //
             case 1000:
                 this.STOP();
                 return;
@@ -395,7 +530,7 @@ public class Z80 {
         text = text.replace("nn,", Integer.toHexString(nn) + ",");
         text = text.replace("n,", Integer.toHexString(n) + ",");
         int whitespace = 64;
-        int spaceforinfo = 18;
+        int spaceforinfo = 22;
         spaceforinfo = spaceforinfo - base.length();
         for (int i = 0; i < spaceforinfo; i++) {
             base = base + " ";
@@ -509,6 +644,19 @@ public class Z80 {
         log("LD C,A");
         Gameboy.memory.wb(0xFF00+c,Gameboy.memory.rom[pc+1]);
     }
+    private void LDHNA(){
+        log("LDH n,A");
+        Gameboy.memory.wb(0xFF00+n, (byte) a);
+        incPC();
+    }
+    private void LDHAN(){
+        log("LDH A,n");
+        a = Gameboy.memory.rb(0xFF00+n);
+        incPC();
+    }
+
+
+
     private void CP(String a, String b) {
         log("CP " + a + "," + b);
         Field i1;
@@ -538,6 +686,232 @@ public class Z80 {
         }
         if ((this.a & 255) == 0) this.f |= 0x80;
         if (this.a > 255) this.f |= 0x10;       // Check for carry
+        if (a.equals("n") || b.equals("n")) {
+            incPC();
+        } else if (a.equals("nn") || b.equals("nn")) {
+            incPC();
+            incPC();
+        }
+
+    }
+    private void LDD(String a, String b){
+        log("LDD " + a + "," + b);
+        Field i1;
+        Field i2;
+        try {
+            i1 = this.getClass().getDeclaredField(a.toLowerCase());
+            i2 = this.getClass().getDeclaredField(b.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code CP " + a + "," + b);
+            e.printStackTrace();
+            return;
+        }
+        if (i1.getType() == int.class && i2.getType() == int.class) {
+            try {
+                i1.setInt(this, Gameboy.memory.rb(i2.getInt(this)));
+                i2.setInt(this,i2.getInt(this)-1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (a.equals("n") || b.equals("n")) {
+            incPC();
+        } else if (a.equals("nn") || b.equals("nn")) {
+            incPC();
+            incPC();
+        }
+    }
+    private void LDI(String a, String b){
+        log("LDD " + a + "," + b);
+        Field i1;
+        Field i2;
+        try {
+            i1 = this.getClass().getDeclaredField(a.toLowerCase());
+            i2 = this.getClass().getDeclaredField(b.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code CP " + a + "," + b);
+            e.printStackTrace();
+            return;
+        }
+        if (i1.getType() == int.class && i2.getType() == int.class) {
+            try {
+                i1.setInt(this, Gameboy.memory.rb(i2.getInt(this)));
+                i2.setInt(this,i2.getInt(this)+1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (a.equals("n") || b.equals("n")) {
+            incPC();
+        } else if (a.equals("nn") || b.equals("nn")) {
+            incPC();
+            incPC();
+        }
+    }
+    private void LDHL(String a, String b){
+        log("LDHL " + a + "," + b);
+        Field i1;
+        Field i2;
+        try {
+            i1 = this.getClass().getDeclaredField(a.toLowerCase());
+            i2 = this.getClass().getDeclaredField(b.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code CP " + a + "," + b);
+            e.printStackTrace();
+            return;
+        }
+        if (i1.getType() == int.class && i2.getType() == int.class) {
+            try {
+                hl = i2.getInt(this) + i1.getInt(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (a.equals("n") || b.equals("n")) {
+            incPC();
+        } else if (a.equals("nn") || b.equals("nn")) {
+            incPC();
+            incPC();
+        }
+    }
+    private void PUSH(String a1){
+        log("PUSH " + a1);
+        Field i1;
+        try {
+            i1 = this.getClass().getDeclaredField(a1.toLowerCase());
+
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code PUSH " + a1);
+            e.printStackTrace();
+            return;
+        }
+        if(i1.getType() == int.class){
+            try {
+                sp--;
+                sp &= 0xFFFF;
+                int word = i1.getInt(this);
+                Gameboy.memory.wb(sp, (byte) ((word>>8)&0xFF));
+                sp--;
+                sp &= 0xFFFF;
+                Gameboy.memory.wb(sp, (byte) ((word&0xFF)));
+
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+    private void POP(String a1){
+        log("POP " + a1);
+        Field i1;
+        try {
+            i1 = this.getClass().getDeclaredField(a1.toLowerCase());
+
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code POP " + a1);
+            e.printStackTrace();
+            return;
+        }
+        if(i1.getType() == int.class){
+            try {
+                sp++;
+                sp &= 0xFFFF;
+                int sp2 = sp+1;
+                sp2&=0xFFFF;
+                int word = (((Gameboy.memory.rb(sp2)&0xFF)<<8)| Gameboy.memory.rb(sp) & 0xff);
+
+                sp++;
+                sp &= 0xFFFF;
+                i1.setInt(this,word);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+    private void adc(String target, String target2) {
+        log("ADC " +target + "," + target2);
+        Field i1;
+        Field i2;
+        try {
+
+            i1 = this.getClass().getDeclaredField(target.toLowerCase());
+            i2 = this.getClass().getDeclaredField(target2.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code ADD " + target + ", " + target2);
+            e.printStackTrace();
+            return;
+        }
+        if(i1.getType() == int.class) {
+            try {
+                int val = i1.getInt(this);
+                int atemp = i2.getInt(this);
+                int carry = ((atemp & C_FLAG) >> 4);
+                int temp = f + val + carry;
+
+                int F = 0;
+                if ((((f & 0x0F) + (val & 0x0F) + carry) & 0x10) == 0x10)
+                    F |= H_FLAG;
+                if ((temp & 0x100) == 0x100)
+                    F |= C_FLAG;
+                if ((temp & 0xFF) == 0)
+                    F |= Z_FLAG;
+                a = (F);
+
+                f = (temp);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        if (target.equals("n") || target2.equals("n")) {
+            incPC();
+        } else if (target.equals("nn") || target2.equals("nn")) {
+            incPC();
+            incPC();
+        }
+    }
+
+    /**
+     * Subtract N from A
+     * @param target A
+     * @param target2 N
+     */
+    private void SUB(String target, String target2){
+        log("SUB " +target + "," + target2);
+        Field i1;
+        Field i2;
+        try {
+
+            i1 = this.getClass().getDeclaredField(target.toLowerCase());
+            i2 = this.getClass().getDeclaredField(target2.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code SUB " + target + ", " + target2);
+            e.printStackTrace();
+            return;
+        }
+        if(i1.getType() == int.class) {
+            try {
+                int val = i1.getInt(this);
+                int atemp = i2.getInt(this);
+                int temp = atemp - val;
+
+                int F = N_FLAG;
+                F |= (H_FLAG & ((atemp ^ val ^ (temp & 0xFF)) << 1));
+                if (temp < 0)
+                    F |= C_FLAG;
+                if ((temp & 0xFF) == 0)
+                    F |= Z_FLAG;
+                f=F;
+
+                i1.setInt(this,temp);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        if (target.equals("n") || target2.equals("n")) {
+            incPC();
+        } else if (target.equals("nn") || target2.equals("nn")) {
+            incPC();
+            incPC();
+        }
     }
 
     private void STOP() {
