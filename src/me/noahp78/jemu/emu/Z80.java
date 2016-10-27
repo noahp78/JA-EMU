@@ -172,6 +172,18 @@ public class Z80 {
             case 0x7D:
                 this.LD("a", "l");
                 return;
+            case 0x0A:
+                this.LD("a","bc");
+                return;
+            case 0x1A:
+                this.LD("a", "de");
+                return;
+            case 0xFA:
+                this.LD("a", "nn");
+                return;
+            case 0x3E:
+                this.LD("a", "n");
+                return;
             case 0x7E:
                 this.LD("a", "hl");
                 return;
@@ -322,6 +334,39 @@ public class Z80 {
             case 0x36:
                 this.LD("hl", "n");
                 return;
+            case 0x47:
+                this.LD("b","a");
+                return;
+            case 0x4F:
+                this.LD("c","a");
+                return;
+            case 0x57:
+                this.LD("d","a");
+                return;
+            case 0x5F:
+                this.LD("e","a");
+                return;
+            case 0x67:
+                this.LD("h","a");
+                return;
+            case 0x02:
+                this.LD("bc","a");
+                return;
+            case 0x12:
+                this.LD("de","a");
+                return;
+            case 0x77:
+                this.LD("hl","a");
+                return;
+            case 0xEA:
+                this.LD("nn","a");
+                return;
+            case 0xF2:
+                this.LDAC();
+                return;
+            case 0xE2:
+                this.LDCA();
+                return;
             // ^ Everything upto page 68 of doc ^ //
             case 1000:
                 this.STOP();
@@ -425,6 +470,11 @@ public class Z80 {
         pc &= 0xFFFF;
     }
 
+    /**
+     * Put value N into NN
+     * @param nn
+     * @param n
+     */
     private void LD(String nn, String n) {
         log("LD " + nn + "," + n);
         Field i1;
@@ -440,9 +490,9 @@ public class Z80 {
         if (i1.getType() == int.class) {
             try {
                 i1.setInt(this, i2.getInt(this));
-                if (n.equals("n")) {
+                if (n.equals("n") || nn.equals("n")) {
                     incPC();
-                } else if (n.equals("nn")) {
+                } else if (n.equals("nn") || nn.equals("nn")) {
                     incPC();
                     incPC();
                 }
@@ -451,7 +501,14 @@ public class Z80 {
             }
         }
     }
-
+    private void LDAC(){
+        log("LD A,C");
+        a= 0xff00 + c;
+    }
+    private void LDCA(){
+        log("LD C,A");
+        Gameboy.memory.wb(0xFF00+c,Gameboy.memory.rom[pc+1]);
+    }
     private void CP(String a, String b) {
         log("CP " + a + "," + b);
         Field i1;

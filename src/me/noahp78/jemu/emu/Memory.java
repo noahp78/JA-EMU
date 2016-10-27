@@ -70,4 +70,49 @@ public class Memory {
         }
         return 0;
     }
+    public void wb(int addr, byte val){
+        switch(addr&0xF000){
+            //BIOS
+            case 0x000:
+                System.out.println("BIOS shouldn't be writeable?");
+            case 0x1000:
+            case 0x2000:
+            case 0x3000:
+                this.rom[addr] =val;
+            case 0x4000:
+            case 0x5000:
+            case 0x6000:
+            case 0x7000:
+                this.rom[addr] =  val;
+            case 0x8000:
+            case 0x9000:
+                Gameboy.gpu.vram[addr&0x1FFF] = val;
+                Gameboy.gpu.updatetile(addr,val);
+            case 0xA000:
+            case 0xB000:
+                this.eram[addr&0x1FFF] = val;
+            case 0xC000:
+            case 0xD000:
+                this.wram[addr&0x1FFF] = val;
+            case 0xE000:
+                this.wram[addr &0x1FFF] = val;
+            case 0xF000:
+                switch(addr & 0x0F00){
+                    case 0x000: case 0x100: case 0x200: case 0x300:
+                    case 0x400: case 0x500: case 0x600: case 0x700:
+                    case 0x800: case 0x900: case 0xA00: case 0xB00:
+                    case 0xC00: case 0xD00:
+                        this.wram[addr&0x1FFF] =val;
+                    case 0xF00:
+                        if(addr >= 0xFF80){
+                            this.zram[addr&0x7F] = val;
+                        }else{
+                            //I/O control handling
+
+                        }
+                }
+
+        }
+
+    }
 }

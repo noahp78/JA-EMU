@@ -23,6 +23,7 @@ public class Gameboy {
         //DEV CODE READ tetris.gb
         //this.memory.rom=
         try{
+
             memory.rom = (Files.readAllBytes(new File("mario.gb").toPath()));
         }catch(Exception e){
             e.printStackTrace();
