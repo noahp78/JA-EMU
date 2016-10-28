@@ -501,6 +501,87 @@ public class Z80 {
             case 0xD6:
                 this.SUB("a","n");
                 return;
+            case 0xA7:
+                this.AND("a", "a");
+                return;
+            case 0xA0:
+                this.AND("a", "b");
+                return;
+            case 0xA1:
+                this.AND("a", "c");
+                return;
+            case 0xA2:
+                this.AND("a", "d");
+                return;
+            case 0xA3:
+                this.AND("a", "e");
+                return;
+            case 0xA4:
+                this.AND("a", "h");
+                return;
+            case 0xA5:
+                this.AND("a", "l");
+                return;
+            case 0xA6:
+                this.AND("a", "hl");
+                return;
+            case 0xE6:
+                this.AND("a", "n");
+                return;
+            case 0xB7:
+                this.OR("a","a");
+                return;
+            case 0xB0:
+                this.OR("a","b");
+                return;
+            case 0xB1:
+                this.OR("a","c");
+                return;
+            case 0xB2:
+                this.OR("a","d");
+                return;
+            case 0xB3:
+                this.OR("a","e");
+                return;
+            case 0xB4:
+                this.OR("a","h");
+                return;
+            case 0xB5:
+                this.OR("a","l");
+                return;
+            case 0xB6:
+                this.OR("a","hl");
+                return;
+            case 0xF6:
+                this.OR("a","n");
+                return;
+            case 0xAF:
+                this.XOR("a","a");
+                return;
+            case 0xA8:
+                this.XOR("a","b");
+                return;
+            case 0xA9:
+                this.XOR("a","c");
+                return;
+            case 0xAA:
+                this.XOR("a","d");
+                return;
+            case 0xAB:
+                this.XOR("a","e");
+                return;
+            case 0xAC:
+                this.XOR("a","h");
+                return;
+            case 0xAD:
+                this.XOR("a","l");
+                return;
+            case 0xAE:
+                this.XOR("a","hl");
+                return;
+            case 0xEE:
+                this.XOR("a","n");
+                return;
 
             // ^ Everything upto page 81 doc ^ //
             case 1000:
@@ -909,6 +990,109 @@ public class Z80 {
         if (target.equals("n") || target2.equals("n")) {
             incPC();
         } else if (target.equals("nn") || target2.equals("nn")) {
+            incPC();
+            incPC();
+        }
+    }
+
+    private void AND(String n, String a){
+        log("AND " +n + "," + a);
+        Field i1;
+        Field i2;
+        try {
+
+            i1 = this.getClass().getDeclaredField(n.toLowerCase());
+            i2 = this.getClass().getDeclaredField(a.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code AND " + n+ ", " + a);
+            e.printStackTrace();
+            return;
+        }
+        if(i1.getType() == int.class || i2.getType() == int.class) {
+            try {
+                int temp = i1.getInt(this) & i2.getInt(this);
+                int F = H_FLAG;
+                if((temp&0xFF) == 0){
+                    F|=Z_FLAG;
+                }
+                this.f = F;
+                i1.setInt(this,temp);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (n.equals("n") || a.equals("n")) {
+            incPC();
+        } else if (n.equals("nn") || a.equals("nn")) {
+            incPC();
+            incPC();
+        }
+    }
+    private void OR(String n, String a){
+        log("OR " +n + "," + a);
+        Field i1;
+        Field i2;
+        try {
+
+            i1 = this.getClass().getDeclaredField(n.toLowerCase());
+            i2 = this.getClass().getDeclaredField(a.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code OR " + n+ ", " + a);
+            e.printStackTrace();
+            return;
+        }
+        if(i1.getType() == int.class || i2.getType() == int.class) {
+            try {
+                int temp = i1.getInt(this) | i2.getInt(this);
+                int F = 0;
+                if((temp&0xFF) == 0){
+                    F|=Z_FLAG;
+                }
+                this.f = F;
+                i1.setInt(this,temp);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (n.equals("n") || a.equals("n")) {
+            incPC();
+        } else if (n.equals("nn") || a.equals("nn")) {
+            incPC();
+            incPC();
+        }
+    }
+    private void XOR(String n, String a){
+        log("XOR " +n + "," + a);
+        Field i1;
+        Field i2;
+        try {
+
+            i1 = this.getClass().getDeclaredField(n.toLowerCase());
+            i2 = this.getClass().getDeclaredField(a.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code OR " + n+ ", " + a);
+            e.printStackTrace();
+            return;
+        }
+        if(i1.getType() == int.class || i2.getType() == int.class) {
+            try {
+                int temp = i1.getInt(this) ^ i2.getInt(this);
+                int F = 0;
+                if((temp&0xFF) == 0){
+                    F|=Z_FLAG;
+                }
+                this.f = F;
+                i1.setInt(this,temp);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (n.equals("n") || a.equals("n")) {
+            incPC();
+        } else if (n.equals("nn") || a.equals("nn")) {
             incPC();
             incPC();
         }
