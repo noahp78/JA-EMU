@@ -21,6 +21,9 @@ public class Z80 {
     public int hl = -32770;
     public int nn = 0;
     public int n = 0;
+
+    public int interrupts_enabled = 0;
+
     //16 Bit Register
     public int sp, pc;
     //CUSTOM / JEMU
@@ -582,8 +585,140 @@ public class Z80 {
             case 0xEE:
                 this.XOR("a","n");
                 return;
+            case 0x3C:
+                this.INC("a");
+                return;
+            case 0x04:
+                this.INC("b");
+                return;
+            case 0x0C:
+                this.INC("c");
+                return;
+            case 0x14:
+                this.INC("d");
+                return;
+            case 0x1C:
+                this.INC("e");
+                return;
+            case 0x24:
+                this.INC("h");
+                return;
+            case 0x2C:
+                this.INC("l");
+                return;
+            case 0x34:
+                this.INC("hl");
+                return;
+            case 0x3D:
+                this.DEC("a");
+                return;
+            case 0x05:
+                this.DEC("b");
+                return;
+            case 0x0D:
+                this.DEC("c");
+                return;
+            case 0x15:
+                this.DEC("d");
+                return;
+            case 0x1D:
+                this.DEC("e");
+                return;
+            case 0x25:
+                this.DEC("h");
+                return;
+            case 0x2D:
+                this.DEC("l");
+                return;
+            case 0x35:
+                this.DEC("hl");
+                return;
+            case 0x09:
+                this.ADD("hl", "bc");
+                return;
+            case 0x19:
+                this.ADD("hl", "de");
+                return;
+            case 0x29:
+                this.ADD("hl", "hl");
+                return;
+            case 0x39:
+                this.ADD("hl", "sp");
+                return;
+            case 0xE8:
+                this.ADD("sp","n");
+                return;
+            case 0x03:
+                this.INC("bc");
+                return;
+            case 0x13:
+                this.INC("de");
+                return;
+            case 0x23:
+                this.INC("hl");
+                return;
+            case 0x33:
+                this.INC("sp");
+                return;
+            case 0x0B:
+                this.DEC("bc");
+                return;
+            case 0x1B:
+                this.DEC("de");
+                return;
+            case 0x2B:
+                this.DEC("hl");
+                return;
+            case 0x3B:
+                this.DEC("sp");
+                return;
+            case 0xCB:
+                incPC();
+                int op = Gameboy.memory.rb(pc);
+                switch(op){
+                    case 0x37:
+                        this.SWAP("a");
+                        return;
+                    case 0x30:
+                        this.SWAP("b");
+                        return;
+                    case 0x31:
+                        this.SWAP("c");
+                        return;
+                    case 0x32:
+                        this.SWAP("d");
+                        return;
+                    case 0x33:
+                        this.SWAP("e");
+                        return;
+                    case 0x34:
+                        this.SWAP("h");
+                        return;
+                    case 0x35:
+                        this.SWAP("l");
+                        return;
+                    case 0x36:
+                        this.SWAP("hl");
+                        return;
 
-            // ^ Everything upto page 81 doc ^ //
+                }
+                return;
+            case 0x27:
+                this.DAA();
+                return;
+            case 0x2F:
+                this.CPL();
+                return;
+            case 0x3F:
+                f = (f & (Z_FLAG | C_FLAG)) ^ C_FLAG;
+                return;
+            case 0x37:
+                f &= Z_FLAG;
+                f |= C_FLAG;
+                return;
+
+
+            // ^ Everything upto page 97 doc ^ //
             case 1000:
                 this.STOP();
                 return;
@@ -798,6 +933,38 @@ public class Z80 {
         if (a.equals("n") || b.equals("n")) {
             incPC();
         } else if (a.equals("nn") || b.equals("nn")) {
+            incPC();
+            incPC();
+        }
+    }
+    private void SWAP(String n){
+        log("SWAP " +n);
+        Field i1;
+        try {
+
+            i1 = this.getClass().getDeclaredField(n.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code OR " + n+ ", " + a);
+            e.printStackTrace();
+            return;
+        }
+        if(i1.getType() == int.class) {
+            try {
+                int val = i1.getInt(this);
+                val = ((val>>4) | (val<<4) & 0xFF);
+                int F = 0;
+                if(val==0){
+                    F=Z_FLAG;
+                }
+                this.f = F;
+                i1.setInt(this,val);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (n.equals("n")) {
+            incPC();
+        } else if (n.equals("nn") ) {
             incPC();
             incPC();
         }
@@ -1097,7 +1264,118 @@ public class Z80 {
             incPC();
         }
     }
+    private void INC(String n){
+        log("INC " +n);
+        Field i1;
+        try {
 
+            i1 = this.getClass().getDeclaredField(n.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code OR " + n+ ", " + a);
+            e.printStackTrace();
+            return;
+        }
+        if(i1.getType() == int.class) {
+            try {
+                int val = i1.getInt(this);
+                int F = this.f & C_FLAG;
+                val++;
+                if((val & 0xF) == 0x0){
+                    F |= H_FLAG;
+                }
+                if((val & 0xFF) == 0){
+                    F |= Z_FLAG;
+                }
+                this.f = F;
+                i1.setInt(this,val);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (n.equals("n")) {
+            incPC();
+        } else if (n.equals("nn") ) {
+            incPC();
+            incPC();
+        }
+    }
+    private void DEC(String n){
+        log("DEC " +n);
+        Field i1;
+        try {
+
+            i1 = this.getClass().getDeclaredField(n.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code DEC" + n);
+            e.printStackTrace();
+            return;
+        }
+        if(i1.getType() == int.class) {
+            try {
+                int val = i1.getInt(this);
+                int F = this.f & C_FLAG;
+                val--;
+                if((val & 0x0F) == 0xF){
+                    F |= H_FLAG;
+                }
+                if((val & 0xFF) == 0){
+                    F |= Z_FLAG;
+                }
+                this.f = F;
+                i1.setInt(this,val);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (n.equals("n")) {
+            incPC();
+        } else if (n.equals("nn") ) {
+            incPC();
+            incPC();
+        }
+    }
+
+    private void CPL(){
+        log("CPL");
+        a = (a^0xFF);
+        f |= H_FLAG;
+        f |= N_FLAG;
+        return;
+    }
+    private void DAA(){
+        log("DAA");
+        int temp = a;
+
+        if ((f & N_FLAG) == 0) {
+            if ((f & H_FLAG) == H_FLAG || (temp & 0xF) > 9)
+                temp += 0x06;
+
+            if ((f & C_FLAG) == C_FLAG || temp > 0x9F)
+                temp += 0x60;
+        } else {
+            if ((f & H_FLAG) == H_FLAG)
+                temp = ((temp - 6) & 0xFF);
+
+            if ((f & C_FLAG) == C_FLAG)
+                temp -= 0x60;
+        }
+
+        f &= ~(H_FLAG | Z_FLAG);
+
+        if ((temp & 0x100) == 0x100)
+            f |= C_FLAG;
+
+        temp &= 0xFF;
+
+        if (temp == 0)
+            f |= Z_FLAG;
+
+        f=(f);
+
+        a = (temp);
+
+    }
     private void STOP() {
         this.stopped = true;
     }

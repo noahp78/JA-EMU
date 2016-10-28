@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="19965641-1248-4fcc-9fdc-4890323441c3" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/JA-EMU/me/noahp78/jemu/emu/Z80.class" afterPath="$PROJECT_DIR$/out/production/JA-EMU/me/noahp78/jemu/emu/Z80.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/me/noahp78/jemu/emu/Z80.java" afterPath="$PROJECT_DIR$/src/me/noahp78/jemu/emu/Z80.java" />
     </list>
     <ignored path="JA-EMU.iws" />
@@ -51,8 +49,8 @@
       <file leaf-file-name="Z80.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/me/noahp78/jemu/emu/Z80.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="160">
-              <caret line="131" column="21" selection-start-line="131" selection-start-column="19" selection-end-line="131" selection-end-column="21" />
+            <state relative-caret-position="93">
+              <caret line="720" column="40" selection-start-line="720" selection-start-column="40" selection-end-line="720" selection-end-column="40" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="method#Z80#0;class#Z80#0" expanded="false" />
@@ -66,7 +64,10 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="858">
               <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
-              <folding />
+              <folding>
+                <element signature="e#1929#1930#0" expanded="false" />
+                <element signature="e#1988#1989#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -121,8 +122,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="723" />
-    <option name="width" value="1205" />
+    <option name="x" value="1074" />
+    <option name="width" value="854" />
     <option name="height" value="1038" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -578,15 +579,15 @@
       <workItem from="1477494905629" duration="348000" />
       <workItem from="1477559036580" duration="10232000" />
       <workItem from="1477571936762" duration="6212000" />
-      <workItem from="1477635777963" duration="1094000" />
+      <workItem from="1477635777963" duration="5767000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="22553000" />
+    <option name="totallyTimeSpent" value="27226000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="723" y="0" width="1205" height="1038" extended-state="0" />
+    <frame x="1074" y="0" width="854" height="1038" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -671,7 +672,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="858">
           <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="e#1929#1930#0" expanded="false" />
+            <element signature="e#1988#1989#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -716,7 +720,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="136">
           <caret line="8" column="33" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
-          <folding />
+          <folding>
+            <element signature="e#1929#1930#0" expanded="false" />
+            <element signature="e#1988#1989#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -843,7 +850,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="858">
           <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="e#1929#1930#0" expanded="false" />
+            <element signature="e#1988#1989#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -857,8 +867,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/me/noahp78/jemu/emu/Z80.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="160">
-          <caret line="131" column="21" selection-start-line="131" selection-start-column="19" selection-end-line="131" selection-end-column="21" />
+        <state relative-caret-position="93">
+          <caret line="720" column="40" selection-start-line="720" selection-start-column="40" selection-end-line="720" selection-end-column="40" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="method#Z80#0;class#Z80#0" expanded="false" />
