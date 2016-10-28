@@ -23,7 +23,7 @@ public class Z80 {
     public int n = 0;
 
     public int interrupts_enabled = 0;
-
+    public boolean interupts = true;
     //16 Bit Register
     public int sp, pc;
     //CUSTOM / JEMU
@@ -50,6 +50,18 @@ public class Z80 {
         int pre_hl = hl;
         int pre_af = af;
         run(opcode);
+        if(interrupts_enabled == -2){
+            interrupts_enabled = -3;
+            interupts=false;
+        }else if(interrupts_enabled == -1){
+            interrupts_enabled = -2;
+        }else if(interrupts_enabled== 2){
+            interrupts_enabled = 3;
+            interupts=true;
+        } else if(interrupts_enabled == 1){
+            interrupts_enabled =2;
+        }
+
         pc++;
         if (bc != pre_bc) {
             //There was a operation on BC
@@ -700,8 +712,105 @@ public class Z80 {
                     case 0x36:
                         this.SWAP("hl");
                         return;
+                    case 0x07:
+                        this.RLC("a");
+                        return;
+                    case 0x00:
+                        this.RLC("b");
+                        return;
+                    case 0x01:
+                        this.RLC("c");
+                        return;
+                    case 0x02:
+                        this.RLC("d");
+                        return;
+                    case 0x03:
+                        this.RLC("e");
+                        return;
+                    case 0x04:
+                        this.RLC("h");
+                        return;
+                    case 0x05:
+                        this.RLC("l");
+                        return;
+                    case 0x06:
+                        this.RLC("hl");
+                        return;
+                    case 0x17:
+                        this.RL("a");
+                        return;
+                    case 0x10:
+                        this.RL("b");
+                        return;
+                    case 0x11:
+                        this.RL("c");
+                        return;
+                    case 0x12:
+                        this.RL("d");
+                        return;
+                    case 0x13:
+                        this.RL("e");
+                        return;
+                    case 0x14:
+                        this.RL("h");
+                        return;
+                    case 0x15:
+                        this.RL("l");
+                        return;
+                    case 0x16:
+                        this.RL("hl");
+                        return;
+                    case 0x0F:
+                        this.RRC("a");
+                        return;
+                    case 0x08:
+                        this.RRC("b");
+                        return;
+                    case 0x09:
+                        this.RRC("c");
+                        return;
+                    case 0x0A:
+                        this.RRC("d");
+                        return;
+                    case 0x0B:
+                        this.RRC("e");
+                        return;
+                    case 0x0C:
+                        this.RRC("h");
+                        return;
+                    case 0x0D:
+                        this.RRC("l");
+                        return;
+                    case 0x0E:
+                        this.RRC("hl");
+                        return;
+                    case 0x1F:
+                        this.RR("a");
+                        return;
+                    case 0x18:
+                        this.RR("b");
+                        return;
+                    case 0x19:
+                        this.RR("c");
+                        return;
+                    case 0x1A:
+                        this.RR("d");
+                        return;
+                    case 0x1B:
+                        this.RR("e");
+                        return;
+                    case 0x1C:
+                        this.RR("h");
+                        return;
+                    case 0x1D:
+                        this.RR("l");
+                        return;
+                    case 0x1E:
+                        this.RR("hl");
+                        return;
 
                 }
+                log("- UNKNOWN OPCODE - CB");
                 return;
             case 0x27:
                 this.DAA();
@@ -716,21 +825,133 @@ public class Z80 {
                 f &= Z_FLAG;
                 f |= C_FLAG;
                 return;
+            case 0xF3:
+                log("INT ENABLE");
+                interrupts_enabled = -1;
+                return;
+            case 0xFB:
+                log("INT DISABLED");
+                interrupts_enabled = 1;
+                return;
+            case 0x07:
+                this.RLC("a");
+                return;
+            case 0x17:
+                //RLA
+                log("RLA");
+                int carry = (f & C_FLAG) >> 4;
+                f = ((a & 0x80) >> 3);
+                a = ((a << 1) | carry);
+                return;
+            case 0x0F:
+                log("RRCA");
+                carry = (a & 0x01);
+                f =(carry << 4);
+                a =((((carry << 7) | a >> 1)));
+            case 0x1F:
+                log("RRA");
+                carry = (f & C_FLAG) >> 4;
+                f = ((a & 0x01) << 4);
+                a = ((carry << 7) | a >> 1);
 
-
-            // ^ Everything upto page 97 doc ^ //
+                // ^ Everything upto page 105 doc ^ //
             case 1000:
                 this.STOP();
                 return;
         }
         //System.out.println("0x" + Integer.toHexString(opcode) + " at PC 0x" + Integer.toHexString(this.pc) + "(" + opcode + "/" + this.pc + ")");
-        log("- UNKNOWN OPCODE -");
+
         unknown++;
         if (Gameboy.HALT_IF_UNKNOWN_OPCODE) {
             this.stopped = true;
         }
     }
+    public void RR(String te){
+        log("RR " + te);
+        Field i1;
+        try {
+            i1 = this.getClass().getDeclaredField(te.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code RRC " + te);
+            e.printStackTrace();
+            return;
+        }
+        if (i1.getType() == int.class) {
+            try {
+                int val = i1.getInt(this);
+                int carry = (f & C_FLAG) >> 4;
+                f = ((val & 0x01) << 4);
+                i1.setInt(this,((carry << 7) | val >> 1));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
+    }
+    public void RRC(String te){
+        log("RRC " + te);
+        Field i1;
+        try {
+            i1 = this.getClass().getDeclaredField(te.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code RRC " + te);
+            e.printStackTrace();
+            return;
+        }
+        if (i1.getType() == int.class) {
+            try {
+                int val = i1.getInt(this);
+                int carry = (val & 0x01);
+                f =(carry << 4);
+                i1.setInt(this,((((carry << 7) | val >> 1))));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+    public void RL(String te){
+        log("RL " + te);
+        Field i1;
+        try {
+            i1 = this.getClass().getDeclaredField(te.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code OR " + n + ", " + a);
+            e.printStackTrace();
+            return;
+        }
+        if (i1.getType() == int.class) {
+            try {
+                int val = i1.getInt(this);
+                int carry = (f & C_FLAG) >> 4;
+                f = ((val & 0x80) >> 3);
+                i1.setInt(this,((val << 1) | carry));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public void RLC(String te) {
+        log("RLC " + te);
+        Field i1;
+        try {
+            i1 = this.getClass().getDeclaredField(te.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Invalid Execution Code OR " + n + ", " + a);
+            e.printStackTrace();
+            return;
+        }
+        if (i1.getType() == int.class) {
+            try {
+                int val = i1.getInt(this);
+                int carry = (val & 0x80) >> 7;
+                f = carry << 4;
+                i1.setInt(this,((val << 1) | carry));
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
     public void log(String text) {
         String base = "SP: " + sp + " | PC: " + Integer.toHexString(pc);
         String mem = "";
